@@ -1,0 +1,57 @@
+---
+title: 'Selamat datang di boilerplate Astro'
+description: 'Tur konvensi yang disertakan starter ini, dari content collection bertipe hingga quality gate.'
+pubDate: 2026-01-12
+tags: [astro, typescript, boilerplate]
+heroImage: '../../../assets/blog/hello-world.jpg'
+heroImageAlt: 'Gradien biru abstrak dengan bentuk geometris berlapis'
+translationKey: hello-world
+---
+
+import Callout from '../../../components/ui/Callout.astro';
+
+Starter ini sengaja dibuat opinionated. Setiap konvensi di bawah ada karena mencegah jenis bug
+yang muncul setelah situs tumbuh melewati beberapa halaman.
+
+<Callout>
+	Konten berada di `src/content/blog/`, satu folder per locale. Locale adalah bagian dari id entri,
+	sehingga URL dan tautan `hreflang` tidak bisa menyimpang dari file di disk.
+</Callout>
+
+## Yang sudah terpasang
+
+- **Astro 7** dengan adapter Node standalone dan prerender selektif.
+- **Content collection bertipe** yang divalidasi Zod, termasuk referensi gambar.
+- **Routing i18n** dengan `prefixDefaultLocale`, fallback, dan feed RSS per locale.
+- **SEO** lewat canonical URL, Open Graph, JSON-LD, sitemap, dan OG image yang dibuat otomatis.
+- **Quality gate**: TypeScript strict, ESLint, Prettier, Vitest, Playwright, GitHub Actions.
+
+## Menambah tulisan
+
+Buat `src/content/blog/id/tulisan-saya.mdx`:
+
+```md
+---
+title: 'Tulisan saya'
+description: 'Satu kalimat yang juga berfungsi sebagai meta description.'
+pubDate: 2026-04-01
+tags: [astro]
+translationKey: my-post
+---
+
+Isi mendukung **MDX**, jadi komponen juga tersedia.
+```
+
+Tambahkan versi Inggrisnya di `src/content/blog/en/my-post.mdx` dengan `translationKey` yang sama,
+lalu pengalih bahasa akan mempertahankan pembaca di artikel yang sama.
+
+## Mulai dari mana
+
+| Path                             | Fungsi                                        |
+| -------------------------------- | --------------------------------------------- |
+| `astro.config.mjs`               | Locale, adapter, CSP, sitemap, font, Tailwind |
+| `src/content.config.ts`          | Loader dan skema collection                   |
+| `src/pages/en/`, `src/pages/id/` | Rute per locale, semuanya diprerender         |
+| `src/lib/`                       | Helper murni yang diuji unit                  |
+
+Draft disaring dari build produksi, tetapi tetap terlihat saat `astro dev`.

@@ -1,0 +1,57 @@
+---
+title: 'Welcome to the Astro boilerplate'
+description: 'A tour of the conventions this starter ships with, from typed content collections to the quality gate.'
+pubDate: 2026-01-12
+tags: [astro, typescript, boilerplate]
+heroImage: '../../../assets/blog/hello-world.jpg'
+heroImageAlt: 'Abstract blue gradient with layered geometric shapes'
+translationKey: hello-world
+---
+
+import Callout from '../../../components/ui/Callout.astro';
+
+This starter is deliberately opinionated. Every convention below exists because it prevents a
+class of bug that shows up once a site grows past a few pages.
+
+<Callout>
+	Content lives in `src/content/blog/`, one folder per locale. The locale is part of the entry id,
+	so URLs and `hreflang` links cannot drift from the files on disk.
+</Callout>
+
+## What is wired up
+
+- **Astro 7** with the standalone Node adapter and selective prerendering.
+- **Typed content collections** validated by Zod, including image references.
+- **i18n routing** with `prefixDefaultLocale`, fallbacks, and per-locale RSS feeds.
+- **SEO** through canonical URLs, Open Graph, JSON-LD, a sitemap, and generated OG images.
+- **Quality gates**: strict TypeScript, ESLint, Prettier, Vitest, Playwright, GitHub Actions.
+
+## Adding a post
+
+Create `src/content/blog/en/my-post.mdx`:
+
+```md
+---
+title: 'My post'
+description: 'One sentence that also works as the meta description.'
+pubDate: 2026-04-01
+tags: [astro]
+translationKey: my-post
+---
+
+The body supports **MDX**, so components are available too.
+```
+
+Add the translation at `src/content/blog/id/my-post.mdx` with the same `translationKey` and the
+language switcher will keep the reader on the same article.
+
+## Where to look first
+
+| Path                             | Purpose                                         |
+| -------------------------------- | ----------------------------------------------- |
+| `astro.config.mjs`               | Locales, adapter, CSP, sitemap, fonts, Tailwind |
+| `src/content.config.ts`          | Collection loader and schema                    |
+| `src/pages/en/`, `src/pages/id/` | Locale routes, all prerendered                  |
+| `src/lib/`                       | Pure helpers covered by unit tests              |
+
+Drafts are filtered out of production builds, but stay visible in `astro dev`.
