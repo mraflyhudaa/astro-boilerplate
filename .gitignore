@@ -1,0 +1,31 @@
+# build output
+dist/
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+*-debug.log*
+
+
+# environment variables
+.env
+.env.production
+.env.local
+.env.*.local
+
+# test coverage
+coverage/
+
+# playwright reports
+test-results/
+playwright-report/
+blob-report/
+
+# macOS-specific files
+.DS_Store
+
+# jetbrains setting folder
+.idea/

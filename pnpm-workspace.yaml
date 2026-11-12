@@ -1,0 +1,6 @@
+# Astro 7.x publishes frequently; the release-age gate would block fresh installs.
+minimumReleaseAge: 0
+
+# Permitted lifecycle scripts (pnpm blocks all others).
+onlyBuiltDependencies:
+  - sharp
