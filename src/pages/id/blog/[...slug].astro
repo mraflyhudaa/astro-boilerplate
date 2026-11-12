@@ -1,0 +1,18 @@
+---
+import BlogPostPage from '../../../components/pages/BlogPostPage.astro';
+import { entrySlug, getBlogPosts } from '../../../lib/posts';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+	const posts = await getBlogPosts('id');
+	return posts.map((entry) => ({
+		params: { slug: entrySlug(entry) },
+		props: { entry },
+	}));
+}
+
+const { entry } = Astro.props;
+---
+
+<BlogPostPage entry={entry} />
