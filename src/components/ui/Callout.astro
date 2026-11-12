@@ -1,0 +1,18 @@
+---
+interface Props {
+	variant?: 'info' | 'warning' | undefined;
+}
+
+const { variant = 'info' } = Astro.props;
+---
+
+<aside
+	class:list={[
+		'my-6 rounded-xl border-l-4 p-4 text-sm',
+		variant === 'info'
+			? 'border-accent bg-card text-fg'
+			: 'border-amber-500 bg-amber-50 text-amber-950 dark:bg-amber-950/40 dark:text-amber-50',
+	]}
+>
+	<slot />
+</aside>

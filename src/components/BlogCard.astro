@@ -1,0 +1,53 @@
+---
+import { Image } from 'astro:assets';
+
+import { readingTimeMinutes } from '../lib/blog';
+import { entryHref, entryLang } from '../lib/posts';
+import type { BlogEntry } from '../lib/posts';
+import { interpolate, useTranslations } from '../i18n/utils';
+import FormattedDate from './ui/FormattedDate.astro';
+
+interface Props {
+	entry: BlogEntry;
+}
+
+const { entry } = Astro.props;
+const locale = entryLang(entry);
+const t = useTranslations(locale);
+const minutes = readingTimeMinutes(entry.body ?? '');
+const href = entryHref(entry);
+---
+
+<article class="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card">
+	{entry.data.heroImage && (
+		<Image
+			src={entry.data.heroImage}
+			alt={entry.data.heroImageAlt ?? ''}
+			widths={[400, 800]}
+			sizes="(min-width: 768px) 50vw, 100vw"
+			loading="lazy"
+			decoding="async"
+			class="aspect-[16/9] w-full object-cover"
+		/>
+	)}
+	<div class="flex flex-1 flex-col gap-3 p-5">
+		<p class="text-xs text-muted">
+			<FormattedDate date={entry.data.pubDate} locale={locale} />
+			<span aria-hidden="true"> · </span>
+			{interpolate(t('blog.readTime'), { minutes })}
+		</p>
+		<h2 class="text-lg font-semibold leading-snug">
+			<a href={href} class="transition-colors group-hover:text-accent">
+				{entry.data.title}
+			</a>
+		</h2>
+		<p class="text-sm leading-relaxed text-muted">{entry.data.description}</p>
+		{entry.data.tags.length > 0 && (
+			<ul class="mt-auto flex flex-wrap gap-2 pt-2 text-xs text-muted">
+				{entry.data.tags.map((tag) => (
+					<li class="rounded-full border border-border px-2 py-0.5">#{tag}</li>
+				))}
+			</ul>
+		)}
+	</div>
+</article>

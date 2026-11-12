@@ -1,0 +1,41 @@
+---
+import { getRelativeLocaleUrl } from 'astro:i18n';
+
+import { localeLabels, localeTags, locales } from '../../i18n/config';
+import type { Locale } from '../../i18n/config';
+import { useTranslations } from '../../i18n/utils';
+import type { AlternateLink } from '../../lib/seo';
+
+interface Props {
+	locale: Locale;
+	alternates?: readonly AlternateLink[] | undefined;
+}
+
+const { locale, alternates = [] } = Astro.props;
+const t = useTranslations(locale);
+
+function hrefFor(target: Locale): string {
+	const alternate = alternates.find((candidate) => candidate.locale === target);
+	if (alternate) return alternate.href;
+	const href = getRelativeLocaleUrl(target);
+	return href.endsWith('/') ? href : `${href}/`;
+}
+---
+
+<nav aria-label={t('language.label')} class="flex items-center gap-1 text-xs font-medium">
+	{locales.map((target) => (
+		<a
+			href={hrefFor(target)}
+			hreflang={localeTags[target]}
+			lang={localeTags[target]}
+			aria-current={target === locale ? 'true' : undefined}
+			title={localeLabels[target]}
+			class:list={[
+				'rounded-md px-2 py-1 uppercase transition-colors',
+				target === locale ? 'bg-accent text-accent-fg' : 'text-muted hover:bg-card hover:text-fg',
+			]}
+		>
+			{target}
+		</a>
+	))}
+</nav>

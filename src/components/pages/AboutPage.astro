@@ -1,0 +1,62 @@
+---
+import { locales, type Locale } from '../../i18n/config';
+import { useTranslations } from '../../i18n/utils';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+interface Props {
+	lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const alternates = locales.map((locale) => ({ locale, href: `/${locale}/about/` }));
+
+const features = [
+	[
+		'Typed content collections',
+		'MDX + Zod schema, drafts filtered in production, image optimization.',
+	],
+	['i18n routing', 'Astro locale routing, per-locale RSS, hreflang and translation links.'],
+	['SEO defaults', 'Canonical URLs, Open Graph, JSON-LD, sitemap and generated OG images.'],
+	['Quality gate', 'Strict TypeScript, ESLint, Prettier, Vitest, Playwright and GitHub Actions.'],
+	['Deployable', 'Standalone Node adapter, multi-stage Dockerfile and health endpoint.'],
+] as const;
+---
+
+<BaseLayout
+	title={t('about.title')}
+	description={t('about.description')}
+	locale={lang}
+	alternates={alternates}
+	image={`/og/${lang}/home.png`}
+>
+	<section class="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
+		<h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">{t('about.title')}</h1>
+		<p class="mt-4 text-lg text-muted">{t('about.description')}</p>
+
+		<ul class="mt-10 grid gap-4">
+			{features.map(([title, description]) => (
+				<li class="rounded-xl border border-border bg-card p-5">
+					<h2 class="font-medium">{title}</h2>
+					<p class="mt-1 text-sm leading-relaxed text-muted">{description}</p>
+				</li>
+			))}
+		</ul>
+
+		<div class="prose mt-10">
+			<h2>Conventions</h2>
+			<ul>
+				<li>
+					Blog entries live in <code>src/content/blog/&lt;locale&gt;/</code>.
+				</li>
+				<li>
+					Translations share a <code>translationKey</code> so hreflang stays correct.
+				</li>
+				<li>Every page is prerendered; API routes render on demand.</li>
+				<li>
+					Run <code>npm run check</code> before pushing.
+				</li>
+			</ul>
+		</div>
+	</section>
+</BaseLayout>

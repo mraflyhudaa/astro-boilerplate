@@ -1,0 +1,97 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { defaultLocale } from '../i18n/config';
+import type { Locale } from '../i18n/config';
+import type { AlternateLink } from '../lib/seo';
+import { SITE } from '../lib/site';
+import '../styles/global.css';
+
+interface Props {
+	title?: string | undefined;
+	description?: string | undefined;
+	locale?: Locale | undefined;
+	alternates?: readonly AlternateLink[] | undefined;
+	image?: string | undefined;
+	noindex?: boolean | undefined;
+	type?: 'website' | 'article' | undefined;
+	publishedTime?: Date | undefined;
+	modifiedTime?: Date | undefined;
+	tags?: readonly string[] | undefined;
+	jsonLd?: readonly Record<string, unknown>[] | undefined;
+}
+
+const {
+	title = SITE.name,
+	description = SITE.description,
+	locale = defaultLocale,
+	alternates,
+	image,
+	noindex,
+	type,
+	publishedTime,
+	modifiedTime,
+	tags,
+	jsonLd,
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang={locale}>
+	<head>
+		<script is:inline>
+			(() => {
+				const root = document.documentElement;
+				const toggles = () => document.querySelectorAll('[data-theme-toggle]');
+				const applyTheme = (isDark) => {
+					root.classList.toggle('dark', isDark);
+					root.style.colorScheme = isDark ? 'dark' : 'light';
+					toggles().forEach((toggle) => toggle.setAttribute('aria-pressed', String(isDark)));
+				};
+
+				let stored = null;
+				try {
+					stored = localStorage.getItem('theme');
+				} catch {
+					/* storage can be unavailable in private modes */
+				}
+				const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+				applyTheme(stored === 'dark' || (stored === null && prefersDark));
+
+				document.addEventListener('click', (event) => {
+					const target =
+						event.target instanceof Element ? event.target.closest('[data-theme-toggle]') : null;
+					if (target === null) return;
+					const isDark = !root.classList.contains('dark');
+					applyTheme(isDark);
+					try {
+						localStorage.setItem('theme', isDark ? 'dark' : 'light');
+					} catch {
+						/* storage can be unavailable in private modes */
+					}
+				});
+			})();
+		</script>
+		<BaseHead
+			title={title}
+			description={description}
+			locale={locale}
+			alternates={alternates}
+			image={image}
+			noindex={noindex}
+			type={type}
+			publishedTime={publishedTime}
+			modifiedTime={modifiedTime}
+			tags={tags}
+			jsonLd={jsonLd}
+		/>
+	</head>
+	<body class="flex min-h-dvh flex-col">
+		<Header locale={locale} alternates={alternates} />
+		<main id="main" class="flex-1">
+			<slot />
+		</main>
+		<Footer locale={locale} />
+	</body>
+</html>

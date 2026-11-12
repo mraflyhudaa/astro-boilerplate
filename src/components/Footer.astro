@@ -1,0 +1,37 @@
+---
+import { getRelativeLocaleUrl } from 'astro:i18n';
+
+import type { Locale } from '../i18n/config';
+import { useTranslations } from '../i18n/utils';
+import { SITE } from '../lib/site';
+
+interface Props {
+	locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const year = new Date().getFullYear();
+
+// Endpoints are not pages: Astro's locale helper appends a trailing slash to `rss.xml`.
+const rssHref = `/${locale}/rss.xml`;
+const localizedHome = getRelativeLocaleUrl(locale);
+const homeHref = localizedHome.endsWith('/') ? localizedHome : `${localizedHome}/`;
+---
+
+<footer class="border-t border-border">
+	<div class="mx-auto flex w-full max-w-5xl flex-col gap-3 px-4 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+		<p>
+			&copy; {year} {SITE.name}. {t('footer.rights')}
+		</p>
+		<p class="flex flex-wrap items-center gap-4">
+			<a class="hover:text-fg" href={rssHref}>
+				{t('footer.rss')}
+			</a>
+			<a class="hover:text-fg" href={homeHref}>
+				{t('nav.home')}
+			</a>
+			<span>{t('footer.builtWith')}</span>
+		</p>
+	</div>
+</footer>

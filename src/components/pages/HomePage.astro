@@ -1,0 +1,84 @@
+---
+import BlogCard from '../BlogCard.astro';
+import { locales, type Locale } from '../../i18n/config';
+import { useTranslations } from '../../i18n/utils';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getBlogPosts } from '../../lib/posts';
+import { absoluteUrl, websiteJsonLd } from '../../lib/seo';
+import { SITE, resolveSite } from '../../lib/site';
+
+interface Props {
+	lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const posts = (await getBlogPosts(lang)).slice(0, 3);
+const site = resolveSite(Astro.site);
+
+const alternates = locales.map((locale) => ({ locale, href: `/${locale}/` }));
+const jsonLd = websiteJsonLd({
+	name: SITE.name,
+	description: t('site.description'),
+	url: absoluteUrl(`/${lang}/`, site),
+	inLanguage: lang,
+});
+---
+
+<BaseLayout
+	title={SITE.name}
+	description={t('site.description')}
+	locale={lang}
+	alternates={alternates}
+	image={`/og/${lang}/home.png`}
+	jsonLd={[jsonLd]}
+>
+	<section class="mx-auto w-full max-w-5xl px-4 pb-16 pt-16 sm:px-6 sm:pb-24 sm:pt-24 lg:px-8">
+		<p class="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted">
+			<span class="size-1.5 rounded-full bg-accent" aria-hidden="true"></span>
+			{t('home.eyebrow')}
+		</p>
+		<h1 class="mt-6 max-w-3xl text-balance text-4xl font-semibold tracking-tight sm:text-6xl">
+			{t('home.title')}
+		</h1>
+		<p class="mt-6 max-w-2xl text-pretty text-lg leading-relaxed text-muted sm:text-xl">
+			{t('home.intro')}
+		</p>
+		<div class="mt-8 flex flex-wrap gap-3">
+			<a
+				href={`/${lang}/blog/`}
+				class="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-accent-fg transition-opacity hover:opacity-90"
+			>
+				{t('nav.blog')}
+			</a>
+			<a
+				href={`/${lang}/about/`}
+				class="rounded-lg border border-border px-5 py-2.5 text-sm font-medium transition-colors hover:bg-card"
+			>
+				{t('nav.about')}
+			</a>
+		</div>
+	</section>
+
+	<section class="mx-auto w-full max-w-5xl px-4 pb-20 sm:px-6 lg:px-8">
+		<div class="flex items-end justify-between gap-4">
+			<h2 class="text-xl font-semibold tracking-tight">{t('home.latestPosts')}</h2>
+			<a href={`/${lang}/blog/`} class="text-sm text-muted transition-colors hover:text-fg">
+				{t('home.allPosts')} <span aria-hidden="true">→</span>
+			</a>
+		</div>
+		{posts.length === 0 ? (
+			<p class="mt-6 text-muted">{t('blog.empty')}</p>
+		) : (
+			<ul
+				class:list={['mt-6 grid gap-6 sm:grid-cols-2', posts.length === 3 ? 'lg:grid-cols-3' : '']}
+			>
+				{posts.map((post) => (
+					<li>
+						<BlogCard entry={post} />
+					</li>
+				))}
+			</ul>
+		)}
+	</section>
+</BaseLayout>

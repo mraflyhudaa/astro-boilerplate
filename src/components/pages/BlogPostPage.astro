@@ -1,0 +1,23 @@
+---
+import { render } from 'astro:content';
+
+import BlogPostLayout from '../../layouts/BlogPostLayout.astro';
+import { getAdjacentPosts, getTranslations, type BlogEntry } from '../../lib/posts';
+
+interface Props {
+	entry: BlogEntry;
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const [alternates, adjacent] = await Promise.all([getTranslations(entry), getAdjacentPosts(entry)]);
+---
+
+<BlogPostLayout
+	entry={entry}
+	alternates={alternates}
+	previous={adjacent.previous}
+	next={adjacent.next}
+>
+	<Content />
+</BlogPostLayout>

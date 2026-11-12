@@ -1,0 +1,138 @@
+---
+import { Image } from 'astro:assets';
+
+import FormattedDate from '../components/ui/FormattedDate.astro';
+import { interpolate, useTranslations } from '../i18n/utils';
+import { readingTimeMinutes } from '../lib/blog';
+import { entryHref, entryLang, entrySlug } from '../lib/posts';
+import type { BlogEntry } from '../lib/posts';
+import { articleJsonLd, absoluteUrl } from '../lib/seo';
+import type { AlternateLink } from '../lib/seo';
+import { SITE, resolveSite } from '../lib/site';
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+	entry: BlogEntry;
+	alternates: readonly AlternateLink[];
+	previous?: BlogEntry | undefined;
+	next?: BlogEntry | undefined;
+}
+
+const { entry, alternates, previous, next } = Astro.props;
+const locale = entryLang(entry);
+const otherTranslations = alternates.filter((alternate) => alternate.locale !== locale);
+const t = useTranslations(locale);
+const minutes = readingTimeMinutes(entry.body ?? '');
+const site = resolveSite(Astro.site);
+const url = absoluteUrl(Astro.url.pathname, site);
+const ogImage = `/og/${locale}/${entrySlug(entry)}.png`;
+
+const jsonLd = articleJsonLd({
+	title: entry.data.title,
+	description: entry.data.description,
+	url,
+	image: absoluteUrl(ogImage, site),
+	datePublished: entry.data.pubDate,
+	...(entry.data.updatedDate === undefined ? {} : { dateModified: entry.data.updatedDate }),
+	authorName: SITE.author,
+	inLanguage: locale,
+	tags: entry.data.tags,
+});
+---
+
+<BaseLayout
+	title={entry.data.title}
+	description={entry.data.description}
+	locale={locale}
+	alternates={alternates}
+	image={ogImage}
+	type="article"
+	publishedTime={entry.data.pubDate}
+	modifiedTime={entry.data.updatedDate}
+	tags={entry.data.tags}
+	jsonLd={[jsonLd]}
+>
+	<article class="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6">
+		<a
+			href={`/${locale}/blog/`}
+			class="inline-flex items-center gap-1 text-sm text-accent transition-colors hover:underline hover:underline-offset-4"
+		>
+			<span aria-hidden="true">←</span>
+			{t('blog.backToBlog')}
+		</a>
+
+		<header class="mt-6 flex flex-col gap-4">
+			<h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">{entry.data.title}</h1>
+			<p class="text-lg text-muted">{entry.data.description}</p>
+			<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
+				<span>
+					{t('blog.published')} <FormattedDate date={entry.data.pubDate} locale={locale} />
+				</span>
+				{entry.data.updatedDate && (
+					<span>
+						{t('blog.updated')} <FormattedDate date={entry.data.updatedDate} locale={locale} />
+					</span>
+				)}
+				<span aria-hidden="true">·</span>
+				<span>{interpolate(t('blog.readTime'), { minutes })}</span>
+			</div>
+			{entry.data.tags.length > 0 && (
+				<ul class="flex flex-wrap gap-2 text-xs text-muted">
+					{entry.data.tags.map((tag) => (
+						<li class="rounded-full border border-border px-2 py-0.5">#{tag}</li>
+					))}
+				</ul>
+			)}
+			{otherTranslations.length > 0 && (
+				<p class="text-sm text-muted">
+					{t('post.translations')}{' '}
+					{otherTranslations.map((alternate, index) => (
+						<span>
+							{index > 0 && ', '}
+							<a class="text-accent underline underline-offset-4" href={alternate.href}>
+								{alternate.locale.toUpperCase()}
+							</a>
+						</span>
+					))}
+				</p>
+			)}
+		</header>
+
+		{entry.data.heroImage && (
+			<Image
+				src={entry.data.heroImage}
+				alt={entry.data.heroImageAlt ?? ''}
+				widths={[640, 1024, 1600]}
+				sizes="(min-width: 768px) 48rem, 100vw"
+				priority
+				class="mt-8 aspect-[16/9] w-full rounded-2xl object-cover"
+			/>
+		)}
+
+		<div class="prose mt-10">
+			<slot />
+		</div>
+
+		{(previous ?? next) && (
+			<nav
+				aria-label={t('post.navigation')}
+				class="mt-12 grid gap-4 border-t border-border pt-8 sm:grid-cols-2"
+			>
+				{previous && (
+					<a href={entryHref(previous)} class="group rounded-xl border border-border p-4">
+						<span class="text-xs uppercase tracking-wide text-muted">{t('post.previous')}</span>
+						<span class="mt-1 block font-medium group-hover:text-accent">
+							{previous.data.title}
+						</span>
+					</a>
+				)}
+				{next && (
+					<a href={entryHref(next)} class="group rounded-xl border border-border p-4 sm:text-right">
+						<span class="text-xs uppercase tracking-wide text-muted">{t('post.next')}</span>
+						<span class="mt-1 block font-medium group-hover:text-accent">{next.data.title}</span>
+					</a>
+				)}
+			</nav>
+		)}
+	</article>
+</BaseLayout>

@@ -1,0 +1,68 @@
+---
+import { getRelativeLocaleUrl } from 'astro:i18n';
+
+import type { Locale } from '../i18n/config';
+import { useTranslations } from '../i18n/utils';
+import { SITE } from '../lib/site';
+import type { AlternateLink } from '../lib/seo';
+import LanguageSwitcher from './ui/LanguageSwitcher.astro';
+import ThemeToggle from './ui/ThemeToggle.astro';
+
+interface Props {
+	locale: Locale;
+	alternates?: readonly AlternateLink[] | undefined;
+}
+
+const { locale, alternates } = Astro.props;
+const t = useTranslations(locale);
+
+function localize(path: string): string {
+	const href = getRelativeLocaleUrl(locale, path);
+	return href.endsWith('/') ? href : `${href}/`;
+}
+
+const links = [
+	{ segment: '', href: localize(''), label: t('nav.home') },
+	{ segment: 'blog', href: localize('blog'), label: t('nav.blog') },
+	{ segment: 'about', href: localize('about'), label: t('nav.about') },
+];
+
+// `/en/blog/hello-world/` keeps the Blog link active; `/en/` maps to the home link.
+const currentSection = Astro.url.pathname.split('/').filter(Boolean)[1] ?? '';
+---
+
+<header class="sticky top-0 z-40 border-b border-border bg-surface/85 backdrop-blur">
+	<a
+		href="#main"
+		class="sr-only rounded-md bg-accent px-4 py-2 text-accent-fg focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50"
+	>
+		{t('skipToContent')}
+	</a>
+	<div class="mx-auto flex w-full max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 sm:px-6 lg:px-8">
+		<a href={localize('')} class="mr-auto text-base font-semibold tracking-tight sm:mr-0">
+			{SITE.name}
+		</a>
+		<nav aria-label={t('nav.main')} class="order-3 w-full sm:order-none sm:w-auto sm:flex-1">
+			<ul class="-ml-2.5 flex flex-wrap items-center gap-1 text-sm font-medium sm:ml-0">
+				{links.map((link) => (
+					<li>
+						<a
+							href={link.href}
+							aria-current={currentSection === link.segment ? 'page' : undefined}
+							class:list={[
+								'rounded-md px-2.5 py-1.5 transition-colors hover:bg-card hover:text-fg',
+								currentSection === link.segment ? 'bg-card text-fg' : 'text-muted',
+							]}
+						>
+							{link.label}
+						</a>
+					</li>
+				))}
+			</ul>
+		</nav>
+		<div class="flex items-center gap-2">
+			<LanguageSwitcher locale={locale} alternates={alternates} />
+			<ThemeToggle locale={locale} />
+		</div>
+	</div>
+</header>
